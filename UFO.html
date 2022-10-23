@@ -1,0 +1,99 @@
+</script>
+	<?php }else{ ?>
+	<div class="note">
+		<div id="note-list"></div>
+	</div>
+	<div class="tool">
+		<div class="tool-btn" id="note-add">添加</div>
+		<div class="tool-btn" id="setting">设置</div>
+		<div class="tool-btn" id="logout">退出</div>
+	</div>
+	<div class="setting">
+		<div class="setting-title">设置</div>
+		<div class="setting-close">✕</div>
+		<div class="form">
+	        <div class="key">网站标题</div>
+	        <div class="value">
+	            <input type="text" name="title" placeholder="网站标题" value="<?php echo $db['title'];?>"/>
+	        </div>
+	    </div>
+	    <div class="form">
+	        <div class="key">登录密码</div>
+	        <div class="value">
+	            <input type="text" name="password" placeholder="登录密码" value="<?php echo $db['password'];?>"/>
+	        </div>
+	    </div>
+	    <div class="btn" onclick="setting()">确定</div>
+	</div>
+	<script>
+		// 添加
+		ice('#note-add').click(function(){
+			ice('#note-list').append(`<div class="tip"><div class="tip-title">标题</div><div class="tip-close">✕</div><div class="tip-content"><p>内容</p></div></div>`);
+			noteInit();
+			ice.setScrollB();
+		})
+		// 设置
+		ice('#setting').click(function(){
+			ice('.setting').show();
+		})
+		ice('.setting-close').click(function(){
+			ice('.setting').hide();
+		})
+		// 退出
+		ice('#logout').click(function(){
+			ice.ajax(window.location.href,{page:'logout'}).then(res=>{
+				location.reload();
+			})
+		})
+		function setting(){
+			ice.ajax(window.location.href,{page:'setting',title:ice('[name=title]').val(),password:ice('[name=password]').val()}).then(res=>{
+				location.reload();
+			})
+		}
+
+		function noteInit(){
+			ice('.tip-title').each(function(i){
+				ice(this).attr('data-key',i)
+				this.oninput = function(){
+					ice.ajax(window.location.href,{page:'note',type:'update',key:i,field:'title',content:this.innerHTML.replace(/<[^>]*>/,'')});
+				}
+			})
+			ice('.tip-content').each(function(i){
+				ice(this).attr('data-key',i)
+				this.oninput = function(){
+					ice.ajax(window.location.href,{page:'note',type:'update',key:i,field:'content',content:this.innerHTML.replace('\n','_@n@_')});
+				}
+			})
+			ice('.tip-close').each(function(i){
+				ice(this).attr('data-key',i)
+				this.onclick = function(){
+					if(confirm('确定删除该笔记吗？删除后无法恢复！')){
+						ice('.tip').i(i).del();
+						ice.ajax(window.location.href,{page:'note',type:'delete',key:i}).then(res=>{
+							noteInit();
+						})
+					}
+				}
+			})
+		}
+		//获取备忘录信息
+		ice.ajax({
+			url:window.location.href,
+			data:{page:'note',type:'get'},
+			success:function(res){
+				if(!res.error){
+					var html = '';
+					res.data.forEach((v,k)=>{
+						html += `<div class="tip"><div class="tip-title">${v.title ? v.title : ''}</div><div class="tip-close">✕</div><div class="tip-content">${v.content ? v.content : ''}</div></div>`
+					})
+					ice('#note-list').html(html);
+					noteInit();
+				}
+			}
+		})
+	</script>
+	<?php } ?>
+</body>
+</html>.user.ini0000644000000000000000000000005714277076235011330 0ustar  rootrootopen_basedir=/www/wwwroot/121.37.105.112/:/tmp/LICENSE0000755000175000017500000000205214274414455010331 0ustar  wwwwwwMIT License
+
+Copyright (c) 2022 xueluo.cn
